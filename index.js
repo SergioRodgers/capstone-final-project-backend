@@ -23,7 +23,7 @@ mongoose
 app.use(cors());
 
 app.use("/auth", authRoute);
-app.use("/users", userRoute);
+app.use("/user", userRoute);
 app.use("/products", productRoute);
 app.use("/carts", cartRoute);
 app.use("/orders", orderRoute);

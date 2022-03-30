@@ -12,6 +12,7 @@ const cors = require("cors");
 
 dotenv.config();
 
+
 mongoose
   .connect(process.env.MONGO_URL)
   .then(() => console.log("DB Connection Successfull!"))
@@ -28,6 +29,14 @@ app.use("/products", productRoute);
 app.use("/carts", cartRoute);
 app.use("/orders", orderRoute);
 app.use("/checkout", stripeRoute);
+
+app.get("/", function(req, res){
+  res.send(`<h1>Welcome to my back end </h1>
+  <br>
+  <hr>
+  <p> DEVELOPED BY SERGIO</p>
+  `)
+});
 
 app.listen(process.env.PORT || 5000, () => {
   console.log("Backend server is running");

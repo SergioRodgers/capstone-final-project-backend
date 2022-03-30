@@ -9,14 +9,31 @@ const router = require("express").Router();
 
 //CREATE
 
-router.post("/", async (req, res) => {
-  const newProduct = new Product(req.body);
+// CREATE a product
+router.post("/",  async (req, res, next) => {
+  const { title, price, categories, img } = req.body;
+
+  let product;
+
+  img
+    ? (product = new Product({
+        title,
+        price,
+        categories,
+        img,
+      }))
+    : (product = new Product({
+      title,
+      price,
+      categories,
+      
+      }));
 
   try {
-    const savedProduct = await newProduct.save();
-    res.status(200).json(savedProduct);
-  } catch (err) {
-    res.status(500).json(err);
+    const newProduct = await product.save();
+    res.status(201).json(newProduct);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
   }
 });
 
@@ -36,13 +53,17 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-//DELETE
-router.delete("/:id", async (req, res) => {
+// DELETing a product 
+router.delete("/:id", [auth, getProduct], async (req, res, next) => {
+  if (req.user._id !== res.product.author)
+    res
+      .status(400)
+      .json({ message: "You do not have the permission to delete this product" });
   try {
-    await Product.findByIdAndDelete(req.params.id);
-    res.status(200).json("Product has been deleted...");
-  } catch (err) {
-    res.status(500).json(err);
+    await res.product.remove();
+    res.json({ message: "Deleted product" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 });
 
@@ -59,16 +80,16 @@ router.get("/find/:id", async (req, res) => {
 //GET ALL PRODUCTS
 router.get("/", async (req, res) => {
   const qNew = req.query.new;
-  const qCategory = req.query.category;
+  const qcategories = req.query.categories;
   try {
     let products;
 
     if (qNew) {
       products = await Product.find().sort({ createdAt: -1 }).limit(1);
-    } else if (qCategory) {
+    } else if (qcategories) {
       products = await Product.find({
         categories: {
-          $in: [qCategory],
+          $in: [qcategories],
         },
       });
     } else {
